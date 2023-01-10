@@ -1,7 +1,7 @@
 #Programa para llevar un registro de los Bolivares que se han pagado en Boom pagos
 from tkinter import *
 from PIL import ImageTk, Image
-from datetime import *
+from datetime import date
 import os
 import sqlite3
 
@@ -56,14 +56,6 @@ def main():
     #VARIABLES
     fecha_hoy = date.today()
 
-    #Esos nombres de variables hace referencia a DataBase o Base de datos. Son listas
-    db_ref = ["0"]
-
-    db_bs_depositados = ["0"]
-
-    db_fecha_registro = ["0"]
-
-
     #FUNCIONES PROGRAMA PRINCIPAL
     def borrarTodoTexto():
 
@@ -89,15 +81,18 @@ def main():
 
             def añadirTextoGUI():
 
-                for i in db_fecha_registro:
+                tupla_datos = verificar_datos(referencia_del_pago, bolivares_depositados)
 
-                    fecha_entry_registro.set(db_fecha_registro[1])
+                for i in tupla_datos:
+                    pass
 
-                ref_entry_result.set(referencia_del_pago)
+                    fecha_entry_registro.set(i[1])
 
-                monto_entry_result.set(bolivares_depositados)
+                    ref_entry_result.set(i[2])
 
-                estado_entry_SV.set("PAGADO")
+                    monto_entry_result.set(i[3])
+
+                    estado_entry_SV.set("PAGADO")
 
             añadirTextoGUI()
 
@@ -217,20 +212,7 @@ def main():
 
                         def accion_del_si():
 
-                            for i in db_ref:
-
-                                db_ref.append(referencia_del_pago)
-                                break
-                            for i in db_bs_depositados:
-
-                                db_bs_depositados.append(bolivares_depositados)
-                                break
-                            if fecha_hoy not in db_fecha_registro:
-                                pass
-                                for i in db_fecha_registro:
-
-                                    db_fecha_registro.append(fecha_hoy)
-                                    break
+                            agregar_datos(fecha_hoy,referencia_del_pago, bolivares_depositados)
 
                             msj_exitoso = Label(nuevaVenta, text="""
 La referencia y el monto en Soberanos
@@ -374,14 +356,14 @@ se acaban de registar correctamente!!!""", bg="Black", fg="White")
     app_Bs.mainloop()
 
 #Base de datos
-def agregar_datos(ref_entry_text, monto_entry_text):
+def agregar_datos(fecha_hoy,referencia_del_pago, bolivares_depositados):
     pass
-    conn = sqlite3.connect("aplicacionbs.db")
+    conn = sqlite3.connect("database_app_bs.db")
     cursor = conn.cursor()
 
-    query = f"INSERT INTO usuarios(id, nombre, passw) VALUES (NULL,?, ?)"
+    query = f"INSERT INTO pagos(id, fecha_registro, referencia_pago, bolivares_deposit) VALUES (NULL,?, ?, ?)"
 
-    rows = cursor.execute(query, (ref_entry_text, monto_entry_text))
+    rows = cursor.execute(query, (fecha_hoy,referencia_del_pago, bolivares_depositados))
 
     conn.commit()
     cursor.close()
@@ -389,20 +371,20 @@ def agregar_datos(ref_entry_text, monto_entry_text):
 
 def verificar_datos(referencia_del_pago, bolivares_depositados):
     pass
-    conn = sqlite3.connect("aplicacionbs.db")
+    conn = sqlite3.connect("database_app_bs.db")
+
     cursor = conn.cursor()
 
-    rows = cursor.execute(f"SELECT * FROM usuarios WHERE nombre= '{referencia_del_pago}' AND passw= '{bolivares_depositados}'")
+    rows = cursor.execute(f"SELECT * FROM pagos WHERE referencia_pago= '{referencia_del_pago}' AND bolivares_deposit= '{bolivares_depositados}'")
 
     datos = rows.fetchall()
 
     cursor.close()
     conn.close()
-    if datos == None:
+    if datos == []:
         return False
-    return True
+    return datos
 
-#empezar
 
 if __name__ == '__main__':
     main()
